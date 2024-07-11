@@ -1,50 +1,30 @@
 # test
-
-        body: LayoutBuilder(builder: (context, constraint) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraint.maxHeight),
-              child: IntrinsicHeight(
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 300,
-                      width: double.infinity,
-                      child: Image.network(
-                        "https://w7.pngwing.com/pngs/549/328/png-transparent-party-balloon-birthday-colorful-balloons-ribbon-color-splash-heart.png",
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        width: double.infinity,
-                        color: Colors.red,
-                        child: Column(
-                          children: [
-                            const Text("1"),
-                            const Text("1"),
-                            const Text("1"),
-                            const Text("1"),
-                            const Text("1"),
-                            const Text("2"),
-                            const Text("2"),
-                            const Text("2"),
-                            const Text("2"),
-                            const Text("3"),
-                            const Text("3"),
-                            const Text("3"),
-                            const Text("4"),
-                            const Text("4"),
-                            Spacer(),
-                            TextFormField(),
-                            const Text("Footer"),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }),
+builder: (context, child) {
+                            return Theme(
+                              data: ThemeData(
+                                useMaterial3: false,
+                                primarySwatch: Colors.grey,
+                                splashColor: Colors.black,
+                                // textTheme: const TextTheme(
+                                //   subtitle1: TextStyle(color: Colors.white),
+                                //   button: TextStyle(color: Colors.amber),
+                                // ),
+                                colorScheme: const ColorScheme.light(
+                                  primary: Colors.pink,
+                                  onSecondary: Colors.black,
+                                  onPrimary: Colors.white,
+                                  surface: Colors.black,
+                                  onSurface: Colors.black,
+                                  secondary: Colors.black,
+                                ),
+                                //  const ColorScheme.dark(
+                                //   primary: Colors.black,
+                                //   surface: Colors.black,
+                                //   onSurface: Colors.white, //txt
+                                //   onSecondary: Colors.white,
+                                //   onPrimary: Colors.white,
+                                //   secondary: Colors.white,
+                                // ),
+                              ),
+                              child: child!,
+                            );
