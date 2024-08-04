@@ -1,29 +1,31 @@
-builder: (context, child) {
-                            return Theme(
-                              data: ThemeData(
-                                useMaterial3: false,
-                                primarySwatch: Colors.grey,
-                                splashColor: Colors.black,
-                                // textTheme: const TextTheme(
-                                //   subtitle1: TextStyle(color: Colors.white),
-                                //   button: TextStyle(color: Colors.amber),
-                                // ),
-                                colorScheme: const ColorScheme.light(
-                                  primary: Colors.pink,
-                                  onSecondary: Colors.black,
-                                  onPrimary: Colors.white,
-                                  surface: Colors.black,
-                                  onSurface: Colors.black,
-                                  secondary: Colors.black,
-                                ),
-                                //  const ColorScheme.dark(
-                                //   primary: Colors.black,
-                                //   surface: Colors.black,
-                                //   onSurface: Colors.white, //txt
-                                //   onSecondary: Colors.white,
-                                //   onPrimary: Colors.white,
-                                //   secondary: Colors.white,
-                                // ),
-                              ),
-                              child: child!,
-                            );
+https://we.tl/t-y2PAAb5Ejf
+casa_vertical_stepper:
+  
+          CasaVerticalStepperView(
+            steps: [
+              StepperStep(
+                leading: const Icon(Icons.alarm),
+                title: const Text('Application review'),
+                view: const Column(
+                  children: [NewWidget(), NewWidget()],
+                ),
+              ),
+              StepperStep(
+                leading: const Icon(Icons.alarm),
+                visible: true,
+                title: const Text('Application review'),
+                view: const Column(
+                  children: [
+                    NewWidget(),
+                    NewWidget(),
+                    NewWidget(),
+                    NewWidget(),
+                    NewWidget(),
+                    NewWidget(),
+                  ],
+                ),
+              ),
+            ],
+            seperatorColor: Colors.red,
+            showStepStatusWidget: false,
+          ),
