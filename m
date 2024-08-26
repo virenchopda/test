@@ -16,6 +16,9 @@ Organizer
 2 set shift bottom-sheet ma divider niche line space.
 3 edit ma discount price no icon textfield.
 4 pricing calendar adult and children textfield dollar.
-5 view all ma preview.
-6 help center tab ma arrow right icon.
-7 preview na publish pr Get.offall().
+5 Set shift ma default date set karvani 6.
+6 view all ma preview.
+7 help center tab ma arrow right icon.
+8 preview na publish pr Get.offall().
+9 manage booking calendar showing old dates.
+10 activites ma calendar ma atyare only ek date show karaviae.
