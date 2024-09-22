@@ -1,0 +1,169 @@
+import 'package:flutter/material.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+void main() => runApp(const App());
+
+class App extends StatelessWidget {
+  const App({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(useMaterial3: true),
+      navigatorKey: navigatorKey,
+      home: const BottomBar(),
+    );
+  }
+}
+
+class BottomBar extends StatefulWidget {
+  const BottomBar({super.key});
+
+  @override
+  BottomBarState createState() => BottomBarState();
+}
+
+class BottomBarState extends State<BottomBar> {
+  int currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(
+          currentIndex.toString(),
+          style: const TextStyle(fontSize: 30),
+        ),
+      ),
+      bottomNavigationBar: bottomNav(),
+    );
+  }
+
+  Widget bottomNav() {
+    MediaQueryData _mediaQueryData = MediaQuery.of(context);
+    double blockSizeHorizontal = _mediaQueryData.size.width / 100;
+    bool hasFour = false;
+    double size = blockSizeHorizontal;
+    return Container(
+      height: blockSizeHorizontal * 17,
+      width: MediaQuery.of(context).size.width,
+      color: Colors.grey[900],
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: size * 3,
+            right: size * 3,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                btnn(0, Icons.home),
+                btnn(1, Icons.search),
+                btnn(2, Icons.explore),
+                btnn(3, Icons.settings),
+                if (!hasFour) btnn(4, Icons.person),
+              ],
+            ),
+          ),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.decelerate,
+            left: size *
+                (hasFour == true
+                    ? currentIndex == 0
+                        ? 8
+                        : currentIndex == 1
+                            ? 31.5
+                            : currentIndex == 2
+                                ? 55.3
+                                : 79
+                    : currentIndex == 0
+                        ? 6
+                        : currentIndex == 1
+                            ? 24.5
+                            : currentIndex == 2
+                                ? 43.4
+                                : currentIndex == 3
+                                    ? 62.3
+                                    : 81.5),
+            child: Column(
+              children: [
+                Container(
+                  height: blockSizeHorizontal * 1.0,
+                  width: blockSizeHorizontal * 12,
+                  decoration: const BoxDecoration(
+                    color: Colors.yellow,
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(20),
+                    ),
+                  ),
+                ),
+                ClipPath(
+                  clipper: MyCustomClipper(),
+                  child: Container(
+                    height: blockSizeHorizontal * 15,
+                    width: blockSizeHorizontal * 13,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.yellow.withOpacity(0.15),
+                          Colors.yellow.withOpacity(0.05),
+                          Colors.transparent
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget btnn(index, icon) {
+    return InkWell(
+      onTap: () {
+        currentIndex = index;
+        setState(() {});
+      },
+      child: AnimatedOpacity(
+        opacity: (currentIndex == index) ? 1 : 0.2,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeIn,
+        child: (currentIndex == index)
+            ? Icon(icon, color: Colors.yellow[300])
+            : Icon(icon, color: Colors.white),
+      ),
+    );
+  }
+}
+
+class MyCustomClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+
+    path.lineTo(
+        (MediaQuery.of(navigatorKey.currentContext!).size.width / 100) * 2, 0);
+    path.lineTo(0, size.height);
+    path.lineTo(size.width, size.height);
+    path.lineTo(
+        size.width -
+            (MediaQuery.of(navigatorKey.currentContext!).size.width / 100) * 2,
+        0);
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return true;
+  }
+}
