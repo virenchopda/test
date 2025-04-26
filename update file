@@ -1,4 +1,190 @@
-1) OTP ma toast
-2) back kare aetle pop up batavanu bottom bar mate
-3) widget zoom & video player sathe place holder loader
-4) UTC local
+import 'dart:developer';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: TtsHighlightScrollPage(),
+    );
+  }
+}
+
+class TtsHighlightScrollPage extends StatefulWidget {
+  const TtsHighlightScrollPage({super.key});
+
+  @override
+  _TtsHighlightScrollPageState createState() => _TtsHighlightScrollPageState();
+}
+
+class _TtsHighlightScrollPageState extends State<TtsHighlightScrollPage> {
+  final FlutterTts flutterTts = FlutterTts();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _textKey = GlobalKey();
+
+  final String _text = '''… Italy di maid, fat cigars
+Pull up like a sheikh, chauffeured cars
+Tailored suits, lakkhan de pair
+I'm a motherfucking millionaire
+… Foreign di deals, mote dinars
+I got dirty money, super powers
+Munda ae rare, karda nahi care
+I'm a motherfucking millionaire
+… Italy di maid, fat cigars
+Pull up like a sheikh, chauffeured cars
+Tailored suits, lakkhan de pair (yeah)
+I'm a motherfucking millionaire (uh-uh)
+… Munda top da brand, agg laggi hoi ae stocks nu
+Red Bull naal ae glassy, khambh lagge mere thoughts nu
+Das saal ho gaye, ajj vi ohna de zehen 'ch main rent free
+Pole dance roz main karaunda, billo, unglaan 'te opps nu
+… Oh chaunde reply, munda dinda nahiyo shit koi
+Mere naa' muqable 'ch hunda nahiyo fit koi
+Oh ajj vi ne label'an di rehnde juth chatde
+Taan vi mere zikar bina na geet hit koi
+… Aah, fanbase mera jivein cult koi
+Ghodiyan banaunde, bole galat koi
+Bina gallon nahiyo OG-OG hundi
+Neetan naal geetan da result ohi
+… Only boss moves, uchche udaars
+Gaddi spaceship, trip to Mars
+Munda top brand, mehenge ne share
+Flying kisses on from everywhere''';
+
+  List<String> words = [];
+  int currentWordIndex = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    words = _text.split(RegExp(r'\s+'));
+    flutterTts.setProgressHandler((text, startOffset, endOffset, word) {
+      _updateCurrentWord(startOffset);
+    });
+    flutterTts.setCompletionHandler(() {
+      setState(() => currentWordIndex = -1);
+    });
+  }
+
+  void _updateCurrentWord(int startOffset) {
+    int charCount = 0;
+    for (int i = 0; i < words.length; i++) {
+      charCount += words[i].length + 1; // plus space
+      if (charCount > startOffset) {
+        setState(() {
+          currentWordIndex = i;
+        });
+        _scrollIfNeeded(i);
+        break;
+      }
+    }
+  }
+
+  void _scrollIfNeeded(int wordIndex) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final RenderBox? renderBox =
+          _textKey.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox != null) {
+        final textHeight = renderBox.size.height;
+        final positionPerWord = textHeight / words.length;
+        final wordPosition = positionPerWord * wordIndex;
+        final viewportHeight = _scrollController.position.viewportDimension;
+
+        // Calculate the offset to center the word
+        final centerOffset =
+            wordPosition - (viewportHeight / 2) + (positionPerWord / 2);
+
+        // Ensure the offset is within the scrollable bounds
+        if (centerOffset > _scrollController.offset ||
+            centerOffset < _scrollController.offset) {
+          _scrollController.animateTo(
+            centerOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      }
+    });
+  }
+
+  Future _speak() async {
+    await flutterTts.stop();
+    await flutterTts.speak(_text);
+  }
+
+  Future _stop() async {
+    await flutterTts.stop();
+    setState(() {
+      currentWordIndex = -1;
+    });
+  }
+
+  @override
+  void dispose() {
+    flutterTts.stop();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Flutter TTS Highlight & Auto-Scroll")),
+      body: Column(
+        children: [
+          const SizedBox(height: 200),
+          Expanded(
+            child: SingleChildScrollView(
+              primary: false,
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16),
+              child: Wrap(
+                key: _textKey,
+                spacing: 4,
+                runSpacing: 8,
+                children: List.generate(words.length, (index) {
+                  return Text(
+                    '${words[index]} ',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: currentWordIndex == index
+                          ? Colors.blue
+                          : Colors.black,
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+          const SizedBox(height: 200),
+        ],
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FloatingActionButton(
+            heroTag: "play",
+            onPressed: _speak,
+            child: const Icon(Icons.play_arrow),
+          ),
+          const SizedBox(width: 20),
+          FloatingActionButton(
+            heroTag: "stop",
+            onPressed: _stop,
+            child: const Icon(Icons.stop),
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+}
