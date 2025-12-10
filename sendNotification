@@ -37,8 +37,8 @@ const tempToken =
 
     print("Access Token: ${access.accessToken.data}");
 
-    final url = Uri.parse(
-      "https://fcm.googleapis.com/v1/projects/e-book-learning-online/messages:send",
+   final url = Uri.parse(
+      "https://fcm.googleapis.com/v1/projects/$projectId/messages:send",
     );
 
     final message = {
