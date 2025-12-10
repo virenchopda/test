@@ -1,5 +1,14 @@
-import 'dart:developer';
+ try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    await NotificationService().initialize();
+    NotificationService().getFirebaseTokenAndSave();
+  } catch (e) {
+    log('Error:-----> ${e}');
+  }
 
+import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
