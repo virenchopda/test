@@ -18,10 +18,8 @@ class VideoDemoBinding extends Bindings {
 }
 
 class VideoDemoController extends GetxController {
-  /// Original video
   Rx<VideoPlayerController?> videoController = Rx<VideoPlayerController?>(null);
 
-  /// Processed video
   Rx<VideoPlayerController?> processedVideoController = Rx<VideoPlayerController?>(null);
 
   RxDouble scale = 1.0.obs;
@@ -31,9 +29,6 @@ class VideoDemoController extends GetxController {
   double _previousRotation = 0.0;
 
   Rx<Offset> position = Offset.zero.obs;
-
-  // final double viewerWidth = Get.width;
-  // final double viewerHeight = Get.height * 0.3;
 
   final double viewerWidth = Get.width;
   final double viewerHeight = Get.height * 0.30;
@@ -59,28 +54,26 @@ class VideoDemoController extends GetxController {
 
     if (details.pointerCount == 1) {
       Offset newPos = position.value + details.focalPointDelta;
-
       final videoWidth = viewerWidth * scale.value;
       final videoHeight = viewerHeight * scale.value;
-
       final maxX = (videoWidth - viewerWidth) / 2;
       final maxY = (videoHeight - viewerHeight) / 2;
-
       final dx = newPos.dx.clamp(-maxX, maxX);
       final dy = newPos.dy.clamp(-maxY, maxY);
-
       position.value = Offset(dx, dy);
     }
   }
 
   void onScaleEnd(ScaleEndDetails? onScaleEnd) {
     // const double maxOffset = 100;
-    //
     // if (position.value.dx.abs() > maxOffset ||
     //     position.value.dy.abs() > maxOffset) {
     //   position.value = Offset.zero;
     // }
   }
+
+  bool get isInOriginalPosition =>
+      (scale.value - 1.0).abs() < 0.01 && position.value.dx.abs() < 0.5 && position.value.dy.abs() < 0.5;
 
   @override
   void onClose() {
@@ -89,82 +82,15 @@ class VideoDemoController extends GetxController {
     super.onClose();
   }
 
-  //   Future<void> exportVideo({required String fileVideoPath}) async {
-  //     try {
-  //       isProcessing.value = true;
-  //       isProcessing.refresh();
-
-  //       await processedVideoController.value?.dispose();
-  //       processedVideoController.value = null;
-  //       processedVideoController.refresh();
-
-  //       // Temporary output file
-  //       final tempDir = await getTemporaryDirectory();
-  //       final outputFile = File('${tempDir.path}/output.mp4');
-  //       if (outputFile.existsSync()) {
-  //         await outputFile.delete();
-  //       }
-
-  //       final quality = 2; // Scale factor for output resolution
-
-  //       final cropW = viewerWidth * quality;
-  //       final cropH = viewerHeight * quality;
-
-  //       final videoW = videoController.value!.value.size.width;
-  //       final videoH = videoController.value!.value.size.height;
-
-  //       // Compute scale to cover crop area
-  //       final coverScale = math.max(cropW / videoW, cropH / videoH);
-  //       final totalScale = coverScale * scale.value;
-
-  //       // Compute offsets for position
-  //       final posX = position.value.dx * quality;
-  //       final posY = position.value.dy * quality;
-
-  //       // Compute crop start points
-  //       final cropX = ((videoW * totalScale - cropW) / 2 - posX).clamp(0.0, videoW * totalScale - cropW);
-  //       final cropY = ((videoH * totalScale - cropH) / 2 - posY).clamp(0.0, videoH * totalScale - cropH);
-
-  //       // Build FFmpeg filter
-  //       final filter =
-  //           'rotate=${rotation.value}:c=white:ow=rotw(${rotation.value}):oh=roth(${rotation.value}),'
-  //           'scale=iw*$totalScale:ih*$totalScale:flags=bilinear,'
-  //           'crop=$cropW:$cropH:$cropX:$cropY';
-
-  //       final command =
-  //           '-i $fileVideoPath '
-  //           '-vf "$filter" '
-  //           '-c:v libx264 '
-  //           '-preset ultrafast '
-  //           '-y ${outputFile.path}';
-
-  //       await FFmpegKit.executeAsync(command, (session) async {
-  //         final rc = await session.getReturnCode();
-  //         if (ReturnCode.isSuccess(rc)) {
-  //           processedVideoController.value = VideoPlayerController.file(outputFile)
-  //             ..initialize().then((_) {
-  //               processedVideoController.value?.play();
-  //               processedVideoController.refresh();
-  //             });
-
-  //           isProcessing.value = false;
-  //           isProcessing.refresh();
-  //         } else {
-  //           isProcessing.value = false;
-  //           isProcessing.refresh();
-  //           Get.snackbar('Error', 'FFmpeg processing failed');
-  //         }
-  //       });
-  //     } catch (e) {
-  //       isProcessing.value = false;
-  //       Get.snackbar('Error', e.toString());
-  //     }
-  //   }
-
   Rx<String?> inputFile = Rx<String?>(null);
 
   Future<void> exportVideo({required String fileVideoPath}) async {
     try {
+      print(
+        'Original positons:---> ${isInOriginalPosition}   ${position.value} --${scale.value}   ${(scale.value - 1.0).abs() < 0.01}',
+      );
+      if (isInOriginalPosition) return;
+
       isProcessing.value = true;
 
       await processedVideoController.value?.dispose();
@@ -178,36 +104,38 @@ class VideoDemoController extends GetxController {
 
       const quality = 2.0;
 
-      /// Output (viewer) size
+      /// Viewer size (output)
       final outW = viewerWidth * quality;
       final outH = viewerHeight * quality;
+
+      /// REAL video size (IMPORTANT)
+      // final videoW = videoController.value!.value.size.width;
+      // final videoH = videoController.value!.value.size.height;
 
       final videoW = viewerWidth;
       final videoH = viewerHeight;
 
-      /// Original video size
-      // final videoW = videoController.value!.value.size.width;
-      // final videoH = videoController.value!.value.size.height;
-
-      /// SAME math as BoxFit.cover
+      /// BoxFit.cover math
       final coverScale = math.max(outW / videoW, outH / videoH);
 
-      final coverW = videoW * coverScale;
-      final coverH = videoH * coverScale;
+      final baseW = videoW * coverScale;
+      final baseH = videoH * coverScale;
 
-      /// User zoom
-      final totalW = coverW * scale.value;
-      final totalH = coverH * scale.value;
+      /// Apply zoom
+      final totalW = baseW * scale.value;
+      final totalH = baseH * scale.value;
 
-      /// User pan (UI → video pixels)
-      final panX = position.value.dx * quality;
-      final panY = position.value.dy * quality;
+      /// Clamp pan when scale == 1
+      final safePanX = scale.value <= 1.01 ? 0.0 : position.value.dx * quality;
+      final safePanY = scale.value <= 1.01 ? 0.0 : position.value.dy * quality;
 
-      /// Center-based crop (IMPORTANT)
-      final cropX = ((totalW - outW) / 2 - panX).clamp(0.0, totalW - outW);
-      final cropY = ((totalH - outH) / 2 - panY).clamp(0.0, totalH - outH);
+      /// Center crop
+      double cropX = (totalW - outW) / 2 - safePanX;
+      double cropY = (totalH - outH) / 2 - safePanY;
 
-      /// FFmpeg filter (NO rotation)
+      cropX = cropX.clamp(0.0, totalW - outW);
+      cropY = cropY.clamp(0.0, totalH - outH);
+
       final filter =
           'scale=$totalW:$totalH:flags=bilinear,'
           'crop=$outW:$outH:$cropX:$cropY';
