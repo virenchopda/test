@@ -1,1 +1,41 @@
 https://we.tl/t-6rXbLh4lRJ TIKTOK
+  flutter_paypal: ^0.2.1
+
+          onPressed: () {
+            // test.us.ind@gmail.com 123456789
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return UsePaypal(
+                    sandboxMode: true,
+                    clientId: "AQtirs0TaK3UkeJS_qcXrAG70ho2plD8zrLuoqPcvdexmTib_pddwIo5Z8E8HG4M-wVoyZuf0qEWTYO0",
+                    secretKey: "EJCLzr9dulOGt8j2Ko_RvAyXWiPYm66lseRvIxjkElY1nKKyMrah_BZXJ41bB5hsTV6nqa7Z8A-84d9U",
+                    returnURL: "https://samplesite.com/return",
+                    cancelURL: "https://samplesite.com/cancel",
+                    transactions: const [
+                      {
+                        "amount": {
+                          "total": "1.00",
+                          "currency": "EUR",
+                          "details": {"subtotal": "1.00"},
+                        },
+                        "description": "Test payment only",
+                      },
+                    ],
+
+                    note: "Contact us for any questions on your order.",
+                    onSuccess: (Map params) async {
+                      print("onSuccess: $params");
+                      //onSuccess: {payerID: TQAJTZ7PSHMMU, paymentId: PAYID-NF3CVUY2KM1975046512422S, token: EC-5EN131794Y006011N, status: success, data: {id: PAYID-NF3CVUY2KM1975046512422S, intent: sale, state: approved, cart: 5EN131794Y006011N, payer: {payment_method: paypal, status: VERIFIED, payer_info: {email: sb-fsuxx48978782@business.example.com, first_name: John, last_name: Doe, payer_id: TQAJTZ7PSHMMU, shipping_address: {recipient_name: John Doe, line1: 2211 N First St, city: San Jose, state: CA, postal_code: 95131, country_code: US}, country_code: US, business_name: Test Store}}, transactions: [{amount: {total: 8.00, currency: USD, details: {subtotal: 8.00, shipping: 0.00, insurance: 0.00, handling_fee: 0.00, shipping_discount: 0.00, discount: 0.00}}, payee: {merchant_id: 6FQP6HSGH76KY, email: sb-ip3c349005141@business.example.com}, description: Test payment only, item_list: {shipping_address: {recipient_name: John Doe, line1: 2211 N First St, city: San Jose, state: CA, postal_code: 95131, country_code: US}}, related_res
+                    },
+                    onError: (error) {
+                      print("onError: $error");
+                    },
+                    onCancel: (params) {
+                      print('cancelled: $params');
+                    },
+                  );
+                },
+              ),
+            );
+          },
