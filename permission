@@ -1,0 +1,54 @@
+import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
+
+
+// <key>NSPhotoLibraryUsageDescription</key>
+// <string>This app needs gallery access</string>
+
+// <key>NSCameraUsageDescription</key>
+// <string>This app needs camera access</string>
+
+// <key>NSMicrophoneUsageDescription</key>
+// <string>This app needs microphone access</string>
+
+
+// <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+
+class Permissions {
+  static Future<bool?> cameraPermissions() async {
+    PermissionStatus cameraStatus = await Permission.camera.status;
+
+    if (!cameraStatus.isGranted) {
+      cameraStatus = await Permission.camera.request();
+      if (!cameraStatus.isGranted) {
+        // Permission required
+        // Camera permission is required for upload profile picture.
+        print('Camera permission is required to use this feature.');
+      }
+    }
+
+    return cameraStatus.isGranted;
+  }
+
+  static Future<bool?> galleryPermissions() async {
+    if (Platform.isIOS) {
+      PermissionStatus galleryStatus = await Permission.photos.status;
+
+      if (!galleryStatus.isGranted) {
+        galleryStatus = await Permission.photos.request();
+        if (!galleryStatus.isGranted) {
+          // Permission required
+          // Gallery permission is required for upload profile picture.
+          print('Gallery permission is required to use this feature.');
+        }
+      }
+
+      return galleryStatus.isGranted;
+    }
+    return true;
+  }
+}
+
+
+// <key>NSAppleIDUsageDescription</key>
+// <string>This app uses Apple ID to sign in</string>
